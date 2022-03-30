@@ -1,4 +1,4 @@
-import  nhost  from "./_utils/nhost";
+import { nhost } from "./_utils/nhost";
 
 export default async (req, res) => {
     
