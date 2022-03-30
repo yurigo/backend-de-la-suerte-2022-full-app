@@ -1,172 +1,151 @@
 <script setup>
 import { ref, reactive } from "vue";
-import  nhost  from "@/nhost";
+import nhost from "@/nhost";
 import gql from "graphql-tag";
 
 import { RouterLink, useRouter } from "vue-router";
 
 import Navigation from "../components/Navigation.vue";
 import Miner from "../components/Miner.vue";
+import router from "../router";
 
-// import { useQuery } from "@vue/apollo-composable";
-// import { useSubscription } from "@vue/apollo-composable";
+let miners = ref([]);
+let debug = ref(false);
 
-let miners = ref([])
-// const minersApo = ref([])
-// const minersSub = ref([])
-
-// console.log(nhost.auth.session.user.id)
-// Get my oro
-// const response = await nhost.graphql.request(`
-//   query MyQuery{
-//     mina_mina(where: {user: {id: {_eq: "${nhost.auth.session.user.id}"}}}) {
-//       oro
-//       user{
-//         id
-//         displayName
-//       }
-//       created_at
-//       }
-//   }
-// `,
-// null,
-// {
-//   headers: {
-//     "X-Hasura-Role": "user"
-//   }
-// });
-// console.log(response)
-
-
-/*
-
-
-subscription GetTodos {
-  todos {
-    title
-    body
-    done
-  }
-}
-
-*/
-
-
-// Get all oros
 const response = await nhost.graphql.request(`
-    query GetGold {
-      users {
-        id
-        displayName
-        avatarUrl
-        mina {
-          oro
-        }
-      }
-    }`,
-  )
-
-console.log("x" , response)
-
-
-// const GET_GOLD = gql`
-//     query GetGold {
-//       users {
-//         id
-//         displayName
-//         avatarUrl
-//         mina {
-//           oro
-//         }
-//       }
-//     }`
-
-// const { result: minersFromApollo }  = useQuery(GET_GOLD)
-
-// console.log("responseApollo: " , minersFromApollo)
-
-// const { result: minersFromSubscription  } = useSubscription(gql`
-//     subscription SubscribeToGold {
-//       users {
-//         id
-//         displayName
-//         avatarUrl
-//         mina {
-//           oro
-//         }
-//       }
-//     }`)
-
-miners.value = response.data.users
-console.log(miners.value)
-
-async function mineralismo(){
-  console.log("mineralismo" , nhost.auth.session.user.id)
-  // return;
-
-  const myId = nhost.auth.session.user.id;
-
-console.log(myId)
-
-      const { res: res1 , error: error1 } = await nhost.functions.call('/random')
-      console.log("res1: " , res1)
-      console.log("res1: " , error1)
-      
-      const { res: res2, error: error2 } = await nhost.functions.call('/hit')
-
-      console.log("res2: " , res2)
-      console.log("error2: " , error2)
-
-  const mutationResponse = await nhost.graphql.request(`
-    mutation FoundGold($_eq: uuid!) {
-      insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
-        affected_rows
-      }
-      update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
-        affected_rows
+query MyQuery {
+  users(order_by: {mina: {oro: desc_nulls_last}}) {
+    id
+    displayName
+    avatarUrl
+    pico_aggregate {
+      aggregate {
+        count(columns: id_user)
       }
     }
+    mina {
+      oro
+    }
+  }
+}
+`);
+
+miners.value = response.data.users;
+console.log(miners.value);
+
+async function mineralismo() {
+
+    if (!nhost.auth.isAuthenticated()) {
+        return router.push('/login');
+    }
+
+    // console.log("mineralismo", nhost.auth.session.user.id);
+    // const myId = nhost.auth.session.user.id;
+    // console.log(myId);
+
+    const hitResponse = await nhost.graphql.request(`
+      mutation MyMutation($oro: Boolean = false) {
+        insert_mina_pico(objects: {oro: $oro}) {
+          affected_rows
+        }
+      }
     `,
-    { _eq: nhost.auth.session.user.id },
-    // { _eq: '4bdc7de1-e85c-49d6-9db8-50a3e195efd4' },
-  )
+        { oro: false }
+    );
 
+    const mutationResponse = await nhost.graphql.request(`
+      mutation FoundGold($_eq: uuid!) {
+        insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
+          affected_rows
+        }
+        update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
+          affected_rows
+        }
+      }
+    `,
+        { _eq: nhost.auth.session.user.id }
+    );
 
-
-  const response = await nhost.graphql.request(`
-      query GetGold {
-        users {
+    const response = await nhost.graphql.request(`
+      query MyQuery {
+        users(order_by: {mina: {oro: desc_nulls_last}}) {
           id
           displayName
           avatarUrl
+          pico_aggregate {
+            aggregate {
+              count(columns: id_user)
+            }
+          }
           mina {
             oro
           }
         }
-      }`,
-    )
+      }
+  `);
 
-  
-  miners.value = response.data.users
-
+    miners.value = response.data.users;
 }
-
-
 </script>
 
 <template>
-    <Navigation/>
+    <Navigation />
     <main>
-        
-        Hello world!, 
-        <br>
-        <code><pre>{{ JSON.stringify(miners, null , 2) }}</pre></code>
+        <code v-if="debug"><pre>{{ JSON.stringify(miners, null , 2) }}</pre></code>
         <!--<code><pre>{{ JSON.stringify(minersFromApollo.users, null , 2) }}</pre></code>-->
         <!--<code><pre>{{ JSON.stringify(minersFromSubscription.users, null , 2) }}</pre></code>-->
-        
-        <Miner v-for="miner in miners" :user="miner" :mina="miner.mina" :key="miner.id"></Miner>
 
-        <button @click="mineralismo">⛏</button>
+        <div class="mina">
+            <Miner
+                v-for="miner in miners"
+                :user="miner"
+                :key="miner.id"
+            ></Miner>
+        </div>
 
+        <button @click="mineralismo"><img src="@/assets/pico-48.png" alt=""></button>
     </main>
 </template>
+
+<style scoped>
+
+code{
+  font-size: .7em;
+}
+
+.mina {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    gap: 1rem;
+}
+
+button {
+  position:fixed;
+  bottom: 10rem;
+  left: 50%;
+  height: 73px;
+  width: 350px;
+  background-color: #f7f7f7;
+  border-style: none;
+  border-radius: 10px;
+  font-size: 2rem;
+  border: 5px solid #517699;
+  cursor: pointer;
+  transform: translateX(-50%);
+}
+button:hover{
+  background-color: #517699;
+  color: #517699;
+}
+button:active{
+  border-color: #8aafd1;
+  background-color: #8aafd1;
+  color: #f7f7f7;
+}
+img{
+  top:5px;
+  vertical-align: baseline;
+}
+</style>
