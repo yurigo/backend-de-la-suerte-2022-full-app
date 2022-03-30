@@ -11,7 +11,7 @@ onErrorCaptured(async (error, vm, info) => {
 
 <template>
     <RouterView v-slot="{ Component }">
-        <Suspense timeout="200">
+        <Suspense timeout="1000">
             <template #default>
                 <Component :is="Component" />
             </template>

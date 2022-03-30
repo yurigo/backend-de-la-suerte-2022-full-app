@@ -1,6 +1,6 @@
 <script setup>
 
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import { useRouter } from "vue-router";
 // import { NhostClient } from "@nhost/nhost-js";
 import nhost from "@/nhost";
@@ -9,6 +9,13 @@ const email = ref("");
 const password = ref("");
 const router = useRouter()
 
+const user = ref(nhost.auth?.session?.user);
+
+watchEffect(() => {
+  if (user.value) {
+      router.push("/");
+  }
+});
 
 async function login(){
     
@@ -24,48 +31,39 @@ async function login(){
         password: password.value
     })
 
+
     console.log("response", response)
 
     // Redirect to home
     // console.log("router", router)
     if (response.error){
-        return console.log("error", response.error)
+      return console.log("error", response.error)
     } 
 
-
-
-    router.push('/')
-
-
+    user.value = nhost.auth?.session?.user;
 }
 
+async function loginGitHub(){
+    const response = await nhost.auth.signIn({
+        provider: "github"
+    });
+    console.log("response", response)
+    if (response.error){
+      return console.log("error", response.error)
+    } 
 
-// Get my oro
-const response = await nhost.graphql.request(`
-  query MyQuery{
-    mina_mina {
-      oro
-      user{
-          displayName
-      }
-    }
-  }
-`,
-null,
-{
-  headers: {
-    
-  }
-});
-
-console.log(response)
-
+    user.value = nhost.auth?.session?.user;
+}
 
 </script>
 
 <template>
-    <div>
-        <h1>Login</h1>
+    <div id="login">
+        <div class="title">
+          <h1><RouterLink to="/"> 🡠 </RouterLink> Login</h1>
+          <h3><RouterLink to="/signup">I'm new</RouterLink></h3>
+        </div>
+
         <label for="email">email</label>
         <input id="email" name="email" type="email" v-model="email">
         <br>
@@ -77,26 +75,36 @@ console.log(response)
         <button @click="login">Login</button>
         <br>
         <br>
+        - or -
         <br>
         <br>
-        <br>
-
-        <code>
-          <pre>{{ JSON.stringify(response.data, null , 2) }}</pre>
-        </code>
+        <button @click="loginGitHub">Login with github</button>
     </div>
 </template>
 
 
 <style scoped>
-div{
+div#login{
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 80vh;
+    height: 100vh;
     width: 300px;
     margin: 0 auto;
+}
+
+.title{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 2rem;
+}
+
+.title a{
+  text-decoration: none;
 }
 
 div label,

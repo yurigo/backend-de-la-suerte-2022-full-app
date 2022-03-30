@@ -45,14 +45,22 @@ const router = createRouter({
 
 router.beforeEach(async (to, from) => {
 
-  const isAuthenticated = await nhost.auth.isAuthenticatedAsync()
-  console.log("eeeeeeeeeeeeeee" , isAuthenticated)
-  // make sure the user is authenticated
-  // ❗️ Avoid an infinite redirect
-  if (!isAuthenticated && to.name !== 'login') {
-    // redirect the user to the login page
-    return { name: 'login' }
-  }
+  // const isAuthenticated = await nhost.auth.isAuthenticatedAsync()
+  // console.log("eeeeeeeeeeeeeee" , isAuthenticated)
+  // // make sure the user is authenticated
+  // // ❗️ Avoid an infinite redirect
+
+  // if (!isAuthenticated && to.name === 'signup') {
+  //   // redirect the user to the login page
+  //   // return { name: 'signup' }
+  //   return 
+  // }
+
+  // if (!isAuthenticated && to.name !== 'login') {
+  //   // redirect the user to the login page
+  //   return { name: 'login' }
+  // }
+
 })
 
 export default router
