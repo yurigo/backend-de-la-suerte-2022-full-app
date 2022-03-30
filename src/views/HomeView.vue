@@ -106,6 +106,17 @@ async function mineralismo(){
 
   const myId = nhost.auth.session.user.id;
 
+console.log(myId)
+
+      const { res: res1 , error: error1 } = await nhost.functions.call('/random')
+      console.log("res1: " , res1)
+      console.log("res1: " , error1)
+      
+      const { res: res2, error: error2 } = await nhost.functions.call('/hit')
+
+      console.log("res2: " , res2)
+      console.log("error2: " , error2)
+
   const mutationResponse = await nhost.graphql.request(`
     mutation FoundGold($_eq: uuid!) {
       insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
@@ -120,10 +131,6 @@ async function mineralismo(){
     // { _eq: '4bdc7de1-e85c-49d6-9db8-50a3e195efd4' },
   )
 
-const { res, error } = await nhost.functions.call('/random')
-console.log("res: " , res)
-const { res, error } = await nhost.functions.call('/hit')
-console.log("res: " , res)
 
 
   const response = await nhost.graphql.request(`
