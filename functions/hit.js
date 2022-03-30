@@ -1,6 +1,6 @@
 import  nhost  from "./_utils/nhost";
 
-export default (req, res) => {
+export default async (req, res) => {
     
     const token = req?.headers?.authorization;
 
