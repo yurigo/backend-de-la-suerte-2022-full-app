@@ -1,8 +1,8 @@
-import  nhost  from "../src/nhost";
+import  nhost  from "./_utils/nhost";
 
 export default (req, res) => {
     
-    const token = req.headers.authorization;
+    const token = req?.headers?.authorization;
 
     res.json({token: token});
 
