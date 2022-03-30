@@ -8,16 +8,16 @@ export default async (req, res) => {
         error: "Unauthorized"
     });
 
-    res.json({token: token});
+    // res.json({token: token});
 
     const mutationResponse = await nhost.graphql.request(`
         mutation FoundGold($_eq: uuid!) {
-        insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
-            affected_rows
-        }
-        update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
-            affected_rows
-        }
+            insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
+                affected_rows
+            }
+            update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
+                affected_rows
+            }
         }
         `,
         { _eq: nhost.auth.session.user.id },
