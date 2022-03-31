@@ -10,6 +10,7 @@ const password = ref("");
 const router = useRouter()
 
 const user = ref(nhost.auth?.session?.user);
+const error = ref("");
 
 watchEffect(() => {
   if (user.value) {
@@ -37,6 +38,7 @@ async function login(){
     // Redirect to home
     // console.log("router", router)
     if (response.error){
+      error.value = response.error.message;
       return console.log("error", response.error)
     } 
 
@@ -49,6 +51,7 @@ async function loginGitHub(){
     });
     console.log("response", response)
     if (response.error){
+      error.value = response.error.message;
       return console.log("error", response.error)
     } 
 
@@ -73,7 +76,11 @@ async function loginGitHub(){
         <br>
         <br>
         <button @click="login">Login</button>
-        <br>
+        <br />
+        <div v-if="error" class="error">
+            {{ error }}
+        </div>
+        <br />
         <br>
         - or -
         <br>
