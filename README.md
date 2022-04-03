@@ -4,6 +4,8 @@ Backend: 🐛 `nhost.io` 🐛
 
 Frontend: 🦄 `vue3` 🦄 y 🌈 `vercel` 🌈.
 
+* Disponible online: [backend-de-la-suerte-parte-2.vercel.app](https://backend-de-la-suerte-parte-2.vercel.app/)
+
 <br>
 
 ## Cómo funciona
