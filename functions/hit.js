@@ -62,7 +62,7 @@ export default async (req, res) => {
           { oro: encontradoOro }
       );
 
-    res.json({ grapql: hitResponse, contador: contador , encontradoOro: encontradoOro , cinco: cinco });
+    res.json({ grapql: hitResponse, contador: contador , encontradoOro: encontradoOro , cinco: cantidad_de_hits });
 
 
 }
