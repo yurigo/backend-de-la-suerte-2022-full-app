@@ -91,8 +91,6 @@ return ;
     //     }
     // `);
 
-    const { res, error } = await nhost.functions.call('/test', { name: 'Johan' })
-
     miners.value = response.data.users;
 }
 </script>
