@@ -35,6 +35,13 @@ console.log(miners.value);
 
 async function mineralismo() {
 
+    const { res, error } = await nhost.functions.call('/hit')
+
+console.log(res)
+console.log(error)
+
+return ;
+
     if (!nhost.auth.isAuthenticated()) {
         return router.push('/login');
     }
@@ -43,46 +50,48 @@ async function mineralismo() {
     // const myId = nhost.auth.session.user.id;
     // console.log(myId);
 
-    const hitResponse = await nhost.graphql.request(`
-      mutation MyMutation($oro: Boolean = false) {
-        insert_mina_pico(objects: {oro: $oro}) {
-          affected_rows
-        }
-      }
-    `,
-        { oro: false }
-    );
+    //   const hitResponse = await nhost.graphql.request(`
+    //     mutation MyMutation($oro: Boolean = false) {
+    //       insert_mina_pico(objects: {oro: $oro}) {
+    //         affected_rows
+    //       }
+    //     }
+    //   `,
+    //       { oro: false }
+    //   );
 
-    const mutationResponse = await nhost.graphql.request(`
-      mutation FoundGold($_eq: uuid!) {
-        insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
-          affected_rows
-        }
-        update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
-          affected_rows
-        }
-      }
-    `,
-        { _eq: nhost.auth.session.user.id }
-    );
+    //   const mutationResponse = await nhost.graphql.request(`
+    //     mutation FoundGold($_eq: uuid!) {
+    //       insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
+    //         affected_rows
+    //       }
+    //       update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
+    //         affected_rows
+    //       }
+    //     }
+    //   `,
+    //       { _eq: nhost.auth.session.user.id }
+    //   );
 
-    const response = await nhost.graphql.request(`
-      query MyQuery {
-        users(order_by: {mina: {oro: desc_nulls_last}}) {
-          id
-          displayName
-          avatarUrl
-          pico_aggregate {
-            aggregate {
-              count(columns: id_user)
-            }
-          }
-          mina {
-            oro
-          }
-        }
-      }
-  `);
+    //   const response = await nhost.graphql.request(`
+    //     query MyQuery {
+    //       users(order_by: {mina: {oro: desc_nulls_last}}) {
+    //         id
+    //         displayName
+    //         avatarUrl
+    //         pico_aggregate {
+    //           aggregate {
+    //             count(columns: id_user)
+    //           }
+    //         }
+    //         mina {
+    //           oro
+    //         }
+    //       }
+    //     }
+    // `);
+
+    const { res, error } = await nhost.functions.call('/test', { name: 'Johan' })
 
     miners.value = response.data.users;
 }
