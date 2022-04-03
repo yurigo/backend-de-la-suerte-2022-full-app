@@ -1,8 +1,8 @@
 <script setup>
     import { ref, defineProps , computed } from 'vue'
     const props = defineProps(['user'])
-    const oro = computed(() => props.user.mina?.oro || 0 )
-    const pico = computed(() => props.user.pico_aggregate?.aggregate?.count || 0 )
+    const oro = computed(() => props.user.oro?.aggregate?.count || 0 )
+    const pico = computed(() => props.user.hits?.aggregate?.count || 0 )
 </script>
 
 <template>

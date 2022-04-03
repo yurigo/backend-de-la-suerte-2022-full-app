@@ -12,39 +12,68 @@ import router from "../router";
 let miners = ref([]);
 let debug = ref(false);
 
-const response = await nhost.graphql.request(`
-query MyQuery {
-  users(order_by: {mina: {oro: desc_nulls_last}}) {
-    id
-    displayName
-    avatarUrl
-    pico_aggregate {
-      aggregate {
-        count(columns: id_user)
+/**
+ * Obtengo a los mineros.
+ * Estoy dejando obsoleta la tabla mina (oro) ya que se puede calcular con el agregado de hits cuando el oro es true.
+ * No obstante, con mina(oro) se podía ordenar por el oro: (order_by: {mina: {oro: desc_nulls_last}})
+ * Quería ordenares los mineros por su oro pero no se puede hacer sobre agregado y condicional.
+ * Se ordenará el array en js al recibir los resultados.
+ */
+
+
+async function getMiners(){
+
+  const QUERY = `
+    query MyQuery {
+      users {
+        id
+        displayName
+        avatarUrl
+        oro: pico_aggregate(where: {oro: {_eq: true}}) {
+          aggregate {
+            count(columns: id_user)
+          }
+        }
+        hits: pico_aggregate {
+          aggregate {
+            count(columns: id_user)
+          }
+        }
       }
-    }
-    mina {
-      oro
-    }
-  }
+    }`;
+
+  const response = await nhost.graphql.request(QUERY);
+  
+  // ordenar los users por su oro
+  
+  // copilot:
+  // const users = response.data.users.sort((a, b) => {
+  //     if (a.oro.aggregate.count > b.oro.aggregate.count) {
+  //         return -1;
+  //     }
+  //     if (a.oro.aggregate.count < b.oro.aggregate.count) {
+  //         return 1;
+  //     }
+  //     return 0;
+  // });
+
+  // not copilot:
+  const users = response.data.users.sort((a, b) => {
+    return b.oro.aggregate.count - a.oro.aggregate.count
+  });
+
+  return users;
+
 }
-`);
 
-miners.value = response.data.users;
-console.log(miners.value);
+miners.value = await getMiners();
 
-// expose nhost for testing
-window.nhost = nhost;
-
+// como no funcionan las suscripciones hago un polling de los mineros cada ¿3 segundos?
+setInterval(async () => {
+  miners.value = await getMiners();
+}, 3000);
 
 async function mineralismo() {
-
-    const { res, error } = await nhost.functions.call('/hit')
-
-console.log(res)
-console.log(error)
-
-return ;
 
     if (!nhost.auth.isAuthenticated()) {
         return router.push('/login');
@@ -95,8 +124,19 @@ return ;
     //     }
     // `);
 
-    miners.value = response.data.users;
+    const { res, error } = await nhost.functions.call('/hit')
+
+    if (error) {
+        console.log(error);
+    }
+
+    // const response = await nhost.graphql.request(QUERY);
+    // miners.value = response.data.users;
+
+    miners.value = await getMiners();
 }
+
+
 </script>
 
 <template>
