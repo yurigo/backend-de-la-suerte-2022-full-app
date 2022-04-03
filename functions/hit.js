@@ -24,7 +24,7 @@ export default async (req, res) => {
         headers: req.headers
     });
 
-    res.json({token: token});
+    // res.json({token: token});
 
     nhost.graphql.setAccessToken(token);
 
