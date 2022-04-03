@@ -122,5 +122,23 @@ La respuesta de nhost es que la han liado parda.
 **Polling cutre**: Cada 3 segundos hago una petición al servidor para actualizar los datos. 😢
 
 
+## Funciones serverless
+
+### CORS
+
+Todo bien hasta toparme con un CORS.
+
+Nada en la documentación sobre el tema.
+
+Por suerte, en github una [discusión en github](https://github.com/nhost/nhost/discussions/276) resuelve la papeleta.
+
+### 404 documentación
+
+Para implementar una función serverless y se conecte a la base de datos con los permisos que tiene el usuario que ha ejecutado la función, no hay nada.  Bueno... no hay nada... Parece que hay algo: https://docs.nhost.io/get-started/cli-workflow/metadata-and-serverless-functions que podría ser la respuesta (porque habla de tablas y permisos...) pero al final la función serverless es una función que devuelve la hora (sin llegar nunca a conectarse a la base de datos 😢).  Mi gozo en un pozo.
+
+
+
+
+
 
 
