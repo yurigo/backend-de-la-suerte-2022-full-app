@@ -2,6 +2,17 @@ import { nhost } from "./_utils/nhost";
 
 export default async (req, res) => {
     
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    res.setHeader('Access-Control-Allow-Methods', '*');
+  
+    // enable CORS for OPTIONS (no need to return any body)
+    if (req.method === 'OPTIONS') {
+      console.log('request is OPTIONS, allow all');
+      return res.status(204).send();
+    }
+
     const token = req?.headers?.authorization;
 
     if(!token) return res.status(401).json({
