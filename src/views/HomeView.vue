@@ -33,6 +33,10 @@ query MyQuery {
 miners.value = response.data.users;
 console.log(miners.value);
 
+// expose nhost for testing
+window.nhost = nhost;
+
+
 async function mineralismo() {
 
     const { res, error } = await nhost.functions.call('/hit')
