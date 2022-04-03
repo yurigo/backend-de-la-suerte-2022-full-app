@@ -16,7 +16,8 @@ export default async (req, res) => {
     const token = req?.headers?.authorization;
 
     if(!token) return res.status(401).json({
-        error: "Unauthorized"
+        err: "Unauthorized",
+        headers: req.headers
     });
 
     res.json({token: token});
