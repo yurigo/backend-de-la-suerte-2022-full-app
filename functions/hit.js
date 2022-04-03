@@ -26,7 +26,7 @@ export default async (req, res) => {
 
     // res.json({token: token});
 
-    nhost.graphql.setAccessToken(token);
+    nhost.graphql.setAccessToken(token.split(" ")[1]);
 
     // const mutationResponse = await nhost.graphql.request(`
     //     mutation FoundGold($_eq: uuid!) {
