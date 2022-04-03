@@ -1,8 +1,8 @@
 import { nhost } from "./_utils/nhost";
 
 
-const cinco = 5;
-const contador = 0;
+let cantidad_de_hits = 5;
+let contador = 0;
 
 export default async (req, res) => {
     
@@ -47,7 +47,7 @@ export default async (req, res) => {
     let encontradoOro = false;
     contador ++;
 
-    if (contador === cinco) {
+    if (contador === cantidad_de_hits) {
         contador = 0;
         encontradoOro = true
     }
