@@ -139,6 +139,37 @@ Para implementar una función serverless y se conecte a la base de datos con los
 
 
 
+## UI/UX
 
+### Taiwind
 
+[Install tailwind CSS with Vue 3 and Vite](https://tailwindcss.com/docs/guides/vite)
 
+1. Install Tailwind CSS
+```
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+```
+
+2. Configure your template paths
+```
+module.exports = {
+  content: [
+    "./index.html",
+    "./src/**/*.{vue,js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+```
+
+3. Add the Tailwind directives to your CSS
+```
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+```
+
+4. Importar el CSS.
