@@ -20,10 +20,8 @@ let debug = ref(false);
  * Se ordenará el array en js al recibir los resultados.
  */
 
-
-async function getMiners(){
-
-  const QUERY = `
+async function getMiners() {
+    const QUERY = `
     query MyQuery {
       users {
         id
@@ -42,41 +40,39 @@ async function getMiners(){
       }
     }`;
 
-  const response = await nhost.graphql.request(QUERY);
-  
-  // ordenar los users por su oro
-  
-  // copilot:
-  // const users = response.data.users.sort((a, b) => {
-  //     if (a.oro.aggregate.count > b.oro.aggregate.count) {
-  //         return -1;
-  //     }
-  //     if (a.oro.aggregate.count < b.oro.aggregate.count) {
-  //         return 1;
-  //     }
-  //     return 0;
-  // });
+    const response = await nhost.graphql.request(QUERY);
 
-  // not copilot:
-  const users = response.data.users.sort((a, b) => {
-    return b.oro.aggregate.count - a.oro.aggregate.count
-  });
+    // ordenar los users por su oro
 
-  return users;
+    // copilot:
+    // const users = response.data.users.sort((a, b) => {
+    //     if (a.oro.aggregate.count > b.oro.aggregate.count) {
+    //         return -1;
+    //     }
+    //     if (a.oro.aggregate.count < b.oro.aggregate.count) {
+    //         return 1;
+    //     }
+    //     return 0;
+    // });
 
+    // not copilot:
+    const users = response.data.users.sort((a, b) => {
+        return b.oro.aggregate.count - a.oro.aggregate.count;
+    });
+
+    return users;
 }
 
 miners.value = await getMiners();
 
 // como no funcionan las suscripciones hago un polling de los mineros cada ¿3 segundos?
 setInterval(async () => {
-  miners.value = await getMiners();
+    miners.value = await getMiners();
 }, 3000);
 
 async function mineralismo() {
-
     if (!nhost.auth.isAuthenticated()) {
-        return router.push('/login');
+        return router.push("/login");
     }
 
     // console.log("mineralismo", nhost.auth.session.user.id);
@@ -124,7 +120,7 @@ async function mineralismo() {
     //     }
     // `);
 
-    const { res, error } = await nhost.functions.call('/hit')
+    const { res, error } = await nhost.functions.call("/hit");
 
     if (error) {
         console.log(error);
@@ -135,14 +131,14 @@ async function mineralismo() {
 
     miners.value = await getMiners();
 }
-
-
 </script>
 
 <template>
     <Navigation />
     <main>
-        <code v-if="debug"><pre>{{ JSON.stringify(miners, null , 2) }}</pre></code>
+        <code v-if="debug">
+            <pre>{{ JSON.stringify(miners, null, 2) }}</pre>
+        </code>
         <!--<code><pre>{{ JSON.stringify(minersFromApollo.users, null , 2) }}</pre></code>-->
         <!--<code><pre>{{ JSON.stringify(minersFromSubscription.users, null , 2) }}</pre></code>-->
 
@@ -154,14 +150,18 @@ async function mineralismo() {
             ></Miner>
         </div>
 
-        <button @click="mineralismo"><img src="@/assets/pico-48.png" alt=""></button>
+        <button
+            class="text-center border-4 border-indigo-500 bg-indigo-500/100 bg-gradient-to-r hover:from-violet-500 hover:to-fuchsia-500"
+            @click="mineralismo"
+        >
+            <img src="@/assets/pico-48.png" alt="" />
+        </button>
     </main>
 </template>
 
 <style scoped>
-
-code{
-  font-size: .7em;
+code {
+    font-size: 0.7em;
 }
 
 .mina {
@@ -173,30 +173,28 @@ code{
 }
 
 button {
-  position:fixed;
-  bottom: 10rem;
-  left: 50%;
-  height: 73px;
-  width: 350px;
-  background-color: #f7f7f7;
-  border-style: none;
-  border-radius: 10px;
-  font-size: 2rem;
-  border: 5px solid #517699;
-  cursor: pointer;
-  transform: translateX(-50%);
+    position: fixed;
+    bottom: 10rem;
+    left: 50%;
+    height: 73px;
+    width: 350px;
+    border-radius: 10px;
+    font-size: 2rem;
+    cursor: pointer;
+    transform: translateX(-50%);
 }
-button:hover{
-  background-color: #517699;
-  color: #517699;
+
+/* button:hover {
+    background-color: #517699;
+    color: #517699;
 }
-button:active{
-  border-color: #8aafd1;
-  background-color: #8aafd1;
-  color: #f7f7f7;
-}
-img{
-  top:5px;
-  vertical-align: baseline;
+button:active {
+    border-color: #8aafd1;
+    background-color: #8aafd1;
+    color: #f7f7f7;
+} */
+
+img {
+    margin: 0 auto;
 }
 </style>
