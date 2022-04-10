@@ -40,9 +40,9 @@ const httpLink = createHttpLink({
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: `${import.meta.env.VITE_NHOSTS_WS}`,
+    url: `${import.meta.env.VITE_NHOSTS_WS}/v1/graphql`,
   })
-  )
+)
 
 // using the ability to split links, you can send data to each link
 // depending on what kind of operation is being sent
@@ -75,10 +75,10 @@ import router from './router'
 
 
 const app = createApp({
-    setup() {
-        provide(DefaultApolloClient, apolloClient)
-    },
-    render: () => h(App),
+  setup() {
+    provide(DefaultApolloClient, apolloClient)
+  },
+  render: () => h(App),
 })
 
 app.use(createPinia())

@@ -4,9 +4,8 @@ import { createRouter, createWebHistory } from 'vue-router'
 // import AboutView from '../views/AboutView.vue'
 import HomeView from '../views/HomeView.vue'
 
-import nhost from '@/nhost'
-console.log("route, isAuthenticated",nhost.auth.isAuthenticated())
-//console.log("route, isLoading",nhost.auth.isLoading())
+// import nhost from '@/nhost'
+// console.log("route, isAuthenticated",nhost.auth.isAuthenticated())
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
