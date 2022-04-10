@@ -1,6 +1,7 @@
 <script setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, watch } from "vue";
 import nhost from "@/nhost";
+import { useSubscription } from "@vue/apollo-composable";
 import gql from "graphql-tag";
 
 import { RouterLink, useRouter } from "vue-router";
@@ -11,6 +12,8 @@ import router from "../router";
 
 let miners = ref([]);
 let debug = ref(false);
+let enableButton = ref(true);
+let encontradoOro = ref(false);
 
 /**
  * Obtengo a los mineros.
@@ -20,105 +23,41 @@ let debug = ref(false);
  * Se ordenará el array en js al recibir los resultados.
  */
 
-async function getMiners() {
-    const QUERY = `
-    query MyQuery {
-      users {
-        id
-        displayName
-        avatarUrl
-        oro: pico_aggregate(where: {oro: {_eq: true}}) {
-          aggregate {
-            count(columns: id_user)
-          }
+const { result } = await useSubscription(gql`
+    subscription MySubscription {
+        users {
+            id
+            displayName
+            avatarUrl
+            oro: pico_aggregate(where: { oro: { _eq: true } }) {
+                aggregate {
+                    count(columns: id_user)
+                }
+            }
+            hits: pico_aggregate {
+                aggregate {
+                    count(columns: id_user)
+                }
+            }
         }
-        hits: pico_aggregate {
-          aggregate {
-            count(columns: id_user)
-          }
-        }
-      }
-    }`;
+    }
+`);
 
-    const response = await nhost.graphql.request(QUERY);
-
-    // ordenar los users por su oro
-
-    // copilot:
-    // const users = response.data.users.sort((a, b) => {
-    //     if (a.oro.aggregate.count > b.oro.aggregate.count) {
-    //         return -1;
-    //     }
-    //     if (a.oro.aggregate.count < b.oro.aggregate.count) {
-    //         return 1;
-    //     }
-    //     return 0;
-    // });
-
-    // not copilot:
-    const users = response.data.users.sort((a, b) => {
-        return b.oro.aggregate.count - a.oro.aggregate.count;
-    });
-
-    return users;
-}
-
-miners.value = await getMiners();
-
-// como no funcionan las suscripciones hago un polling de los mineros cada ¿3 segundos?
-setInterval(async () => {
-    miners.value = await getMiners();
-}, 3000);
+watch(
+    result,
+    (newValue) => {
+        miners.value = newValue.users.sort((a, b) => {
+            return b.oro.aggregate.count - a.oro.aggregate.count;
+        });
+    }
+);
 
 async function mineralismo() {
+
+    enableButton.value = false;
     if (!nhost.auth.isAuthenticated()) {
         return router.push("/login");
     }
-
-    // console.log("mineralismo", nhost.auth.session.user.id);
-    // const myId = nhost.auth.session.user.id;
-    // console.log(myId);
-
-    //   const hitResponse = await nhost.graphql.request(`
-    //     mutation MyMutation($oro: Boolean = false) {
-    //       insert_mina_pico(objects: {oro: $oro}) {
-    //         affected_rows
-    //       }
-    //     }
-    //   `,
-    //       { oro: false }
-    //   );
-
-    //   const mutationResponse = await nhost.graphql.request(`
-    //     mutation FoundGold($_eq: uuid!) {
-    //       insert_mina_mina(objects: {}, on_conflict: {constraint: mina_pkey}) {
-    //         affected_rows
-    //       }
-    //       update_mina_mina(where: {user: {id: {_eq: $_eq}}}, _inc: {oro: 1}) {
-    //         affected_rows
-    //       }
-    //     }
-    //   `,
-    //       { _eq: nhost.auth.session.user.id }
-    //   );
-
-    //   const response = await nhost.graphql.request(`
-    //     query MyQuery {
-    //       users(order_by: {mina: {oro: desc_nulls_last}}) {
-    //         id
-    //         displayName
-    //         avatarUrl
-    //         pico_aggregate {
-    //           aggregate {
-    //             count(columns: id_user)
-    //           }
-    //         }
-    //         mina {
-    //           oro
-    //         }
-    //       }
-    //     }
-    // `);
 
     const { res, error } = await nhost.functions.call("/hit");
 
@@ -126,10 +65,19 @@ async function mineralismo() {
         console.log(error);
     }
 
-    // const response = await nhost.graphql.request(QUERY);
-    // miners.value = response.data.users;
+    if (res.data.encontradoOro) {
+        console.log("Has encontrado oro!!");
+        // modifico el color del body si se ha encontrado oro
+        // lo hago accediendo al document.body, es correcto?
+        // o se debería hacer de algun otro modo?
+        document.body.classList.add("oro")
+        setTimeout(() => {
+            document.body.classList.remove("oro")
+        }, 250);
+    }
 
-    miners.value = await getMiners();
+    encontradoOro.value = res.data.encontradoOro;
+    enableButton.value = true;
 }
 </script>
 
@@ -139,9 +87,6 @@ async function mineralismo() {
         <code v-if="debug">
             <pre>{{ JSON.stringify(miners, null, 2) }}</pre>
         </code>
-        <!--<code><pre>{{ JSON.stringify(minersFromApollo.users, null , 2) }}</pre></code>-->
-        <!--<code><pre>{{ JSON.stringify(minersFromSubscription.users, null , 2) }}</pre></code>-->
-
         <div class="mina">
             <Miner
                 v-for="miner in miners"
@@ -151,11 +96,21 @@ async function mineralismo() {
         </div>
 
         <button
-            class="text-center border-4 border-indigo-500 bg-indigo-500/100 bg-gradient-to-r hover:from-violet-500 hover:to-fuchsia-500"
+            :disabled="!enableButton"
+            class="text-center border-4 border-indigo-500 bg-indigo-500/100 
+            
+            hover:bg-indigo-500/50
+            active:border-indigo-500/50
+            
+            disabled:cursor-not-allowed
+            disabled:bg-gray-500
+            disabled:border-gray-500/50"
+
             @click="mineralismo"
         >
             <img src="@/assets/pico-48.png" alt="" />
         </button>
+
     </main>
 </template>
 
@@ -168,7 +123,6 @@ code {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-
     gap: 1rem;
 }
 
@@ -183,16 +137,6 @@ button {
     cursor: pointer;
     transform: translateX(-50%);
 }
-
-/* button:hover {
-    background-color: #517699;
-    color: #517699;
-}
-button:active {
-    border-color: #8aafd1;
-    background-color: #8aafd1;
-    color: #f7f7f7;
-} */
 
 img {
     margin: 0 auto;
